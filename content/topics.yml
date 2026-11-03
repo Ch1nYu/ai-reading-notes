@@ -1,0 +1,23 @@
+# Controlled topic vocabulary. Every note's `topics` must use keys from this file.
+# Order here is the display order of filter chips on the home page.
+agents:
+  label: Agent 設計
+  description: Agent 架構、workflow 模式、harness 與系統設計
+coding-agents:
+  label: Coding Agent 與 Skill
+  description: Claude Code、Codex、Pi 等 coding agent 的用法、工具與 skill
+llm-internals:
+  label: LLM 原理
+  description: Transformer、KV cache、從零實作與經典論文
+models:
+  label: 模型與公司
+  description: 模型發布、推論效能、AI 公司介紹
+tools:
+  label: 開源工具
+  description: 值得收藏的開源專案與函式庫
+industry:
+  label: 產業觀點
+  description: 演講、訪談與對 AI 產業的評論
+practice:
+  label: 開發實務
+  description: 成本、資安、開源經營與學習方法

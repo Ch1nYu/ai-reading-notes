@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ note.title }} · {{ site.title }}{% endblock %}
+{% block description %}{{ note.summary }}{% endblock %}
+{% block body_class %}page-note{% endblock %}
+{% block content %}
+<article class="note">
+  <header class="note__head">
+    <nav class="crumbs" aria-label="麵包屑">
+      <a href="{{ root }}#notes">全部筆記</a>
+      {% for t in note.topics %}<span aria-hidden="true">/</span><a href="{{ root }}?topic={{ t.key }}#notes">{{ t.label }}</a>{% endfor %}
+    </nav>
+    <p class="kicker">{{ note.type_label }} · {{ note.source_site }}</p>
+    <h1 class="note__title">{{ note.title }}</h1>
+    <p class="note__deck">{{ note.summary }}</p>
+    <div class="note__byline">
+      <dl class="meta-list">
+        <div><dt>收錄</dt><dd><time datetime="{{ note.added }}">{{ note.added }}</time></dd></div>
+        {% if note.duration %}<div><dt>片長</dt><dd>{{ note.duration }}</dd></div>{% endif %}
+        {% if note.language %}<div><dt>原文</dt><dd>{{ '英文' if note.language == 'en' else '中文' }}</dd></div>{% endif %}
+        <div><dt>閱讀</dt><dd>{{ note.reading_minutes }} 分鐘</dd></div>
+      </dl>
+      <a class="button" href="{{ note.source_url }}" target="_blank" rel="noopener">閱讀原文<span aria-hidden="true"> ↗</span></a>
+    </div>
+  </header>
+
+  <div class="note__layout">
+    {% if note.toc %}
+    <aside class="toc" aria-label="本頁目錄">
+      <details open>
+        <summary>本頁目錄</summary>
+        <ol>
+          {% for h in note.toc %}
+          <li class="toc__l{{ h.level }}"><a href="#{{ h.id }}">{{ h.text }}</a></li>
+          {% endfor %}
+        </ol>
+      </details>
+    </aside>
+    {% endif %}
+
+    <div class="prose">
+      {% if note.abstract %}
+      <section class="abstract" aria-label="導讀">
+        <p class="abstract__label">導讀</p>
+        <p>{{ note.abstract }}</p>
+      </section>
+      {% endif %}
+      {{ note.html|safe }}
+    </div>
+  </div>
+
+  <footer class="note__foot">
+    <p class="note__tags">
+      {% for t in note.topics %}<a class="topic-chip" href="{{ root }}?topic={{ t.key }}#notes">{{ t.label }}</a>{% endfor %}
+    </p>
+    <nav class="pager" aria-label="上一篇與下一篇">
+      {% if prev %}<a class="pager__prev" href="{{ root }}{{ prev.url }}"><span class="kicker">← 較新</span><span class="pager__title">{{ prev.title }}</span></a>{% else %}<span></span>{% endif %}
+      {% if next %}<a class="pager__next" href="{{ root }}{{ next.url }}"><span class="kicker">較舊 →</span><span class="pager__title">{{ next.title }}</span></a>{% endif %}
+    </nav>
+  </footer>
+</article>
+{% endblock %}
