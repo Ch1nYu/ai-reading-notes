@@ -80,6 +80,7 @@ abstract: 選填，兩到四句的導讀，顯示在筆記頁開頭。
 - **閱讀寬度**：內文欄寬上限為 `--measure`（約 40em），行高 1.85。
 - **層次**：用字級、字重、細線和留白分層；卡片是有上框線的條目，不用陰影或圓角大卡片。
 - **元件**：新增 UI 前，先在 `site.css` 找現有的 class 重用，例如 `.kicker`、`.topic-chip`、`.note-row`、`.table-wrap`；需要新元件時，寫在對應區段的註解標題下。
+- **動態**：動畫只用來說明狀態變化，例如出現、移動、切換，不做純裝飾。時長和曲線只用 `--dur-1`（懸浮、按下）、`--dur-2`（狀態切換）、`--dur-3`（進場）、`--ease-out` 和 `--stagger`；動畫只用 `transform` 和 `opacity` 產生，不改版面尺寸。要在捲動時淡入的元素，用 `site.js` 的 `reveal()` 加上 `data-reveal`。所有效果都必須在 `prefers-reduced-motion: reduce` 時停用，`site.css` 最後的 media query 已經統一處理，JS 動畫則先檢查 `reduced`。
 - **無障礙**：互動元素都要能用鍵盤操作並有可見的 focus 樣式；圖示按鈕要有 `aria-label`；色彩對比至少 WCAG AA。
 
 ## 新增或修改內容

@@ -5,13 +5,13 @@
 <section class="hero">
   <div class="hero__copy">
     <p class="kicker">Reading Notes · AI &amp; Engineering</p>
-    <h1 class="hero__title">讀過的，<br>留下來。</h1>
+    <h1 class="hero__title"><span class="line" style="--i:0"><span>讀過的，</span></span><span class="line" style="--i:1"><span>留下來。</span></span></h1>
     <p class="hero__lede">{{ site.tagline }}</p>
     <dl class="hero__stats">
-      <div><dt>筆記</dt><dd>{{ notes_total }}</dd></div>
-      <div><dt>文章</dt><dd>{{ counts.article }}</dd></div>
-      <div><dt>影片</dt><dd>{{ counts.video }}</dd></div>
-      <div><dt>主題</dt><dd>{{ topics|length }}</dd></div>
+      <div><dt>筆記</dt><dd data-countup>{{ notes_total }}</dd></div>
+      <div><dt>文章</dt><dd data-countup>{{ counts.article }}</dd></div>
+      <div><dt>影片</dt><dd data-countup>{{ counts.video }}</dd></div>
+      <div><dt>主題</dt><dd data-countup>{{ topics|length }}</dd></div>
     </dl>
   </div>
   <article class="lead-story">
@@ -36,6 +36,7 @@
       <kbd>/</kbd>
     </label>
     <div class="segmented" role="group" aria-label="類型">
+      <span class="segmented__thumb" aria-hidden="true"></span>
       <button type="button" data-type-filter="" aria-pressed="true">全部</button>
       <button type="button" data-type-filter="article" aria-pressed="false">文章</button>
       <button type="button" data-type-filter="video" aria-pressed="false">影片</button>
