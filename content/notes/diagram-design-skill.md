@@ -20,7 +20,7 @@ abstract: Diagram Design 是一個適用於 Claude Code、Codex 與 Pi 的 Agent
 該 Skill 包含 27 種圖表類型（架構圖、流程圖、時序圖、狀態機、ER 模型、時間線、泳道圖、象限圖、嵌套圖、樹狀圖、組織圖、維恩圖、圖層堆疊、金字塔/漏斗、顧問 2×2、雷達圖、迴路圖、IT 現狀圖、高階圖、長條圖、折線圖、甘特圖、散布圖、流程圖、醇泥圖、資料流圖、DP 整合、DP 安全矩陣等），每種圖表提供 minimal light、minimal dark 與 full-editorial 三種變體，可直接在瀏覽器開啟無需建置步驟。
 
 ### 使用方式與品牌對接流程
-使用者只需透過對應的 Agent（Pi、Claude Code、Codec）安裝該 Skill，然後執行 onboarding 指令（例如 `onboard diagram-design to https://yoursite.com`），Skill 會抓取網站的主頁、提取主要色板與字型堆疊，將其映射至語意角色（paper、ink、muted、accent、title、node-name、sublabel），並自行進行 WCAG AA 對比檢查。完成後，所有新產出的圖表會自動使用該網站的品牌樣式，亦可手動編
+使用者只需透過對應的 Agent（Pi、Claude Code、Codex）安裝該 Skill，然後執行 onboarding 指令（例如 `onboard diagram-design to https://yoursite.com`），Skill 會抓取網站的主頁、提取主要色板與字型堆疊，將其映射至語意角色（paper、ink、muted、accent、title、node-name、sublabel），並自行進行 WCAG AA 對比檢查。完成後，所有新產出的圖表會自動使用該網站的品牌樣式，亦可手動編輯 `skills/diagram-design/references/style-guide.md` 覆寫語意角色設定，或從既有 draw.io、Mermaid 檔案匯入重繪。
 
 ## 重點知識與概念拆解
 
@@ -37,7 +37,7 @@ abstract: Diagram Design 是一個適用於 Claude Code、Codex 與 Pi 的 Agent
 | 原文 | 中譯 | 脈絡／解釋 |
 |------|------|------------|
 | The highest-quality move is usually deletion. | 最高品質的動作通常是刪除。 | 作者在解釋設計哲學時所言，強調每個節點必須證明其存在價值。 |
-| Every node earns its place. | 每個節點都必須赢得其位置。 | 同上，用以闡述圖表設計中「節點必有其存在意義」的原則。 |
+| Every node earns its place. | 每個節點都必須贏得其位置。 | 同上，用以闡述圖表設計中「節點必有其存在意義」的原則。 |
 
 ## 可參考資料
 - **littlemight.com**：作者的個人部落格與新聞信箱，文中多次提及作為靈感來源與範例網站。 — <https://littlemight.com?utm_source=diagram-design&utm_medium=readme&utm_campaign=github&utm_content=intro>
@@ -45,4 +45,4 @@ abstract: Diagram Design 是一個適用於 Claude Code、Codex 與 Pi 的 Agent
 - **GitHub repository**：項目原始碼所在，包含所有說明文件、範例與腳本。 — <https://github.com/cathrynlavery/diagram-design>
 - **X (formerly Twitter) - Cathryn Lavery**：作者的社群平台，文末邀請讀者前往互動。 — <https://x.com/cathrynlavery>
 - **Tabler Icons**：提供 55 個單色 IT/cloud 圖示，用於 Diagram Design 的圖示集。 — <https://tabler.io/icons>
-- **Simple Icons**：提供品牌 silhouettes 圖示，同样用於圖示集，採 CC0 授權。 — <https://simpleicons.org>
+- **Simple Icons**：提供品牌 silhouettes 圖示，同樣用於圖示集，採 CC0 授權。 — <https://simpleicons.org>

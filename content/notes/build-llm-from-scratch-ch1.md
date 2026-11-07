@@ -100,26 +100,24 @@ abstract: 這是《Build a Large Language Model (From Scratch)》第 1 章的互
 
 ## 重點知識與概念拆解
 
-| 概念名 | 一句白話解釋 |
-|--------|--------------|
-| **LLM (Large Language Model)** | 把「猜下一個字」練到極致的深度神經網路，參數與資料雙重「大」。 |
-| **Next-word Prediction / 自回歸** | 核心訓練任務：給前文輸出下一 token 機率；生成時輸出接回輸入循環產出序列。 |
-| **Self-Supervised Learning (自監督學習)** | 不需人工標註，句子「右移一格」即得 (input, target) 配對，讓全網文字成教材。 |
-| **Pretraining (預訓練) vs Fine-tuning (微調)** | 先在大雜資料練通用語言能力 (Foundation Model)，再用小精資料調整特定行為 (助理/分類器)。 |
-| **Transformer 架構** | 2017 年為翻譯設計的 Encoder-Decoder 架構，核心 Self-Attention 實現選擇性注意。 |
-| **BERT vs GPT** | BERT 取 Encoder 做雙向遮罩預測 (理解/分類)；GPT 取 Decoder 做單向接龍 (生成)。 |
-| **Scaling Laws / 三大天文數字** | GPT-3 為例：175B 參數、300B tokens、$4.6M 成本；「大」可量化、非形容詞。 |
-| **Emergent Behavior (湧現行為)** | 未被明確訓練的能力 (翻譯、推理等) 隨規模自然出現，是「一模型多任務」價值來源。 |
-| **Zero-shot / Few-shot** | 不改權重、不重訓，純靠 Prompt (零/少範例) 完成新任務，展現極強泛化。 |
-| **Tokenization (斷詞/Token化)** | 文字→模型可讀整數 ID 的第一步 (Ch2 主題)，Token ≈ 詞+標點，非單字。 |
-| **開源權重策略** | 自行預訓練成本極高，實務上載入開源權重 (如 GPT-2, LLaMA) 於消費級硬體微調。 |
-| **三階段九步驟藍圖** | Ch2-4 打地基 (資料/Attention/架構) → Ch5 預訓練/載入權重 → Ch6-7 微調 (分類/助理)。 |
+| 概念 | 白話解釋 | 來源證據 |
+|------|----------|----------|
+| **LLM (Large Language Model)** | 把「猜下一個字」練到極致的深度神經網路，參數與資料雙重「大」。 | 1.1 節定義：在極大量文字上訓練、理解與生成類人文字的深度神經網路，座標位於 AI ⊃ ML ⊃ DL ⊃ LLM 最內圈。 |
+| **Next-word Prediction / 自回歸** | 核心訓練任務：給前文輸出下一 token 機率；生成時輸出接回輸入循環產出序列。 | 1.1 與 1.6 節：Autoregressive 機制一次生成一 token 並將輸出接回輸入，解釋 ChatGPT 逐字吐出的原因。 |
+| **Self-Supervised Learning (自監督學習)** | 不需人工標註，句子「右移一格」即得 (input, target) 配對，讓全網文字成教材。 | 1.3 節與知識檢核 Q3：標籤藏在資料裡，右移一格自動生成，吃掉絕大多數預訓練算力並產出 Foundation Model。 |
+| **Pretraining (預訓練) vs Fine-tuning (微調)** | 先在大雜資料練通用語言能力 (Foundation Model)，再用小精資料調整特定行為 (助理/分類器)。 | 1.3 節兩階段配方：Pretraining 學習通用語言表徵，Fine-tuning 分為 Instruction Fine-tuning 與 Classification Fine-tuning。 |
+| **Transformer 架構** | 2017 年為翻譯設計的 Encoder-Decoder 架構，核心 Self-Attention 實現選擇性注意。 | 1.4 節：源自 Vaswani et al. (2017)《Attention Is All You Need》，藉由 Self-Attention 捕捉長距離語意依賴。 |
+| **BERT vs GPT** | BERT 取 Encoder 做雙向遮罩預測 (理解/分類)；GPT 取 Decoder 做單向接龍 (生成)。 | 1.4 與 1.6 節：BERT 採 Masked Word Prediction，GPT 簡化為僅 Decoder 並堆疊至 96 層（175B 參數）。 |
+| **Scaling Laws / 三大天文數字** | GPT-3 為例：175B 參數、300B tokens、$4.6M 成本；「大」可量化、非形容詞。 | 1.5 節 Table 1.1 與規模換算器：300B tokens 約等於 300 萬本小說，人以 250 tokens/分不眠不休讀完需約 2,283 年。 |
+| **Emergent Behavior (湧現行為)** | 未被明確訓練的能力 (翻譯、推理等) 隨規模自然出現，是「一模型多任務」價值來源。 | 1.2 與 1.6 節：訓練目標僅 Next-word prediction，卻因接觸海量多語資料而自然湧現翻譯、摘要、分類能力。 |
+| **Zero-shot / Few-shot** | 不改權重、不重訓，純靠 Prompt (零/少範例) 完成新任務，展現極強泛化。 | 1.4 節與知識檢核 Q6：Zero-shot 對未見任務泛化、Few-shot 在 Prompt 提供範例，皆無需修改模型權重。 |
+| **開源權重策略與三階段九步驟藍圖** | 自行預訓練成本極高，實務上先在小資料集實作機制，再載入開源權重（如 GPT-2）於消費級硬體微調。 | 1.5 與 1.7 節藍圖：Stage 1 打地基（Ch2–4）→ Stage 2 預訓練與載入 GPT-2 權重（Ch5，繞過 $4.6M 成本）→ Stage 3 微調（Ch6–7）。 |
 
 
 ## 中英金句與解釋
 
-| 原文 | 中譯 | 脈絡/解釋 |
-|------|------|-----------|
+| 原文 | 中譯 | 脈絡／解釋 |
+|------|------|------------|
 | **Simple training objective × massive scale = seemingly magical capabilities.** | **簡單的訓練目標 × 巨大的規模 ＝ 看似神奇的能力。** | 本章核心心法：Next-word prediction 極簡單，配上 175B 參數與 300B tokens 即產生類人智慧。 |
 | **LLM = a deep neural network trained on vast amounts of text to understand, generate, and respond with human-like text.** | **LLM = 在海量文字上訓練、能理解/生成/回應類人文字的深度神經網路。** | 1.1 節一句話定義，點出架構(深度網路)、資料(海量文字)、功能(理解/生成/回應)三要素。 |
 | **“Large” is a double entendre: parameter count and dataset size are both unprecedented.** | **「Large」是雙關：參數量與資料量雙雙空前地大。** | 釐清「大」非形容詞，而是兩個可量化規模 (1.5 節有互動換算器)。 |
@@ -132,19 +130,10 @@ abstract: 這是《Build a Large Language Model (From Scratch)》第 1 章的互
 
 ## 可參考資料
 
-- **原著書籍**：Sebastian Raschka, *Build a Large Language Model (From Scratch)*, Manning Publications. (本教材內容、數值、圖表皆對應 Ch.1)
-- **奠基論文**：Vaswani et al. (2017), **"Attention Is All You Need"** (Transformer 架構來源)。
-- **GPT 系列論文**：
-  - Radford et al. (2018), *"Improving Language Understanding by Generative Pre-Training"* (GPT-1)。
-  - Brown et al. (2020), *"Language Models are Few-Shot Learners"* (GPT-3, 175B, 300B tokens, $4.6M 估算來源)。
-  - Ouyang et al. (2022), *"Training language models to follow instructions with human feedback"* (InstructGPT / ChatGPT 微調方法)。
-- **開放語料庫**：
-  - **Dolma** (Allen AI, ~3T tokens, 含版權內容需注意)。
-  - **CommonCrawl** (網頁歸檔, GPT-3 60% 來源)。
-  - **The Pile** / **RedPajama** / **FineWeb** (其他常見開源預訓練語料)。
-- **開源模型權重**：
-  - **GPT-2** (OpenAI, 124M~1.5B, 本書 Ch5 載入實作用)。
-  - **LLaMA / LLaMA 2 / LLaMA 3** (Meta, 含 ArXiv, StackExchange 等資料)。
-  - **BloombergGPT** (金融領域客製化範例)。
-- **工具鏈**：**PyTorch** (本書實作框架, 附錄 A 有速成教學)。
-- **互動教材網站**：[twinkleai.tw/llm-from-scratch-course](https://apps.twinkleai.tw/llm-from-scratch-course/) (含規模換算器、注意力視覺化、知識檢核等互動元件)。
+- **Sebastian Raschka, Build a Large Language Model (From Scratch)**：Manning Publications 出版的原著書籍，本互動教材內容、數值與圖表皆對應第 1 章。
+- **Vaswani et al. (2017) "Attention Is All You Need"**：提出 Transformer（Encoder-Decoder 與 Self-Attention）架構的奠基論文。
+- **GPT 系列核心論文**：含 Radford et al. (2018) GPT-1、Brown et al. (2020) GPT-3（175B 參數、300B tokens、$4.6M 估算來源）、Ouyang et al. (2022) InstructGPT 微調方法。
+- **開放預訓練語料庫**：含 CommonCrawl（佔 GPT-3 訓練權重 60%）、Allen AI Dolma（約 3T tokens）、The Pile、RedPajama 與 FineWeb。
+- **開源模型權重與領域模型**：含 OpenAI GPT-2（124M–1.5B，第 5 章載入實作用）、Meta LLaMA 系列與金融領域客製化的 BloombergGPT。
+- **PyTorch**：全書實作採用的深度學習框架（附錄 A 提供速成教學）。
+- **TwinkleAI 互動教材網站**：提供規模換算器、注意力視覺化與知識檢核等互動元件。 — <https://apps.twinkleai.tw/llm-from-scratch-course/ch01.html>

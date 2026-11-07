@@ -63,7 +63,10 @@ TYPE_LABELS = {"article": "文章", "video": "影片"}
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 CJK_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
+HAN_RE = re.compile(r"[\u4e00-\u9fff]")
 LATIN_WORD_RE = re.compile(r"[A-Za-z][A-Za-z'’\-]*")
+H2_LINE_RE = re.compile(r"^##\s+(.+)$")
+SUMMARY_ENDINGS = ("。", "）", ")", "」", "』", "”", ".", "!", "?", "：", ":", "`", "*")
 SUMMARY_MAX = 200
 
 MD = MarkdownIt("commonmark", {"linkify": False}).enable("table")
@@ -165,6 +168,18 @@ def heading_titles(tokens: list[Token], tag: str) -> list[str]:
     return titles
 
 
+def find_simplified_chars(text: str) -> list[str]:
+    found: list[str] = []
+    for char in text:
+        if HAN_RE.match(char):
+            try:
+                char.encode("cp950")
+            except UnicodeEncodeError:
+                if char not in found:
+                    found.append(char)
+    return found
+
+
 def validate_body(body: str, report: Report) -> None:
     tokens = MD.parse(body)
     h1s = heading_titles(tokens, "h1")
@@ -178,6 +193,63 @@ def validate_body(body: str, report: Report) -> None:
     positions = [ALLOWED_H2.index(title) for title in h2s if title in ALLOWED_H2]
     if len(set(positions)) != len(positions) or positions != sorted(positions):
         report.error("H2 區塊順序錯誤，應為：" + " → ".join(ALLOWED_H2))
+
+    sections: dict[str, list[str]] = {}
+    current_h2: str | None = None
+    for line in body.splitlines():
+        match = H2_LINE_RE.match(line)
+        if match:
+            current_h2 = match.group(1).strip()
+            sections[current_h2] = []
+        elif current_h2 is not None:
+            sections[current_h2].append(line)
+
+    if "完整摘要" in sections:
+        sec = sections["完整摘要"]
+        if not any(line.startswith("### ") for line in sec):
+            report.error("「完整摘要」需以 H3（###）分段")
+        for line in sec:
+            stripped = line.strip()
+            if not stripped or stripped.startswith(("#", "|", "---", ">")):
+                continue
+            if not stripped.endswith(SUMMARY_ENDINGS):
+                report.error(f"「完整摘要」段落疑似截斷或未正常收尾：…{stripped[-30:]}")
+
+    for sec_name, expected_cols in (
+        ("重點知識與概念拆解", ["概念", "白話解釋", "來源證據"]),
+        ("中英金句與解釋", ["原文", "中譯", "脈絡／解釋"]),
+    ):
+        if sec_name not in sections:
+            continue
+        sec = sections[sec_name]
+        if any(line.startswith("### ") for line in sec):
+            report.error(f"「{sec_name}」不可有 H3 子標題")
+        headers = [line for line in sec if line.strip().startswith("|") and "---" not in line][:1]
+        if not headers:
+            report.error(f"「{sec_name}」必須是表格")
+        else:
+            cols = [col.strip() for col in headers[0].strip().strip("|").split("|")]
+            if cols != expected_cols:
+                report.error(
+                    f"「{sec_name}」表格欄位應為 {'｜'.join(expected_cols)}，目前為 {'｜'.join(cols)}"
+                )
+
+    if "可參考資料" in sections:
+        sec = sections["可參考資料"]
+        bad_lines = [line.strip() for line in sec if line.strip() and not line.strip().startswith("- **")]
+        if bad_lines:
+            report.error(f"「可參考資料」需為 `- **名稱**` 清單格式：{bad_lines[0][:40]}")
+
+    for sec_name, sec_lines in sections.items():
+        for line in sec_lines:
+            check_text = line
+            if sec_name == QUOTES_H2 and line.strip().startswith("|"):
+                cells = line.strip().strip("|").split("|")
+                if len(cells) >= 2:
+                    check_text = "|".join(cells[1:])
+            simp = find_simplified_chars(check_text)
+            if simp:
+                report.error(f"「{sec_name}」含非繁體字（{''.join(simp)}）：{check_text.strip()[:40]}")
 
 
 def normalize_added(value: Any) -> str | None:
@@ -244,6 +316,13 @@ def validate_frontmatter(
     summary = data.get("summary")
     if isinstance(summary, str) and len(summary) > SUMMARY_MAX:
         report.warn(f"summary 超過 {SUMMARY_MAX} 字（目前 {len(summary)} 字）")
+
+    for field_name in ("title", "summary", "abstract"):
+        val = data.get(field_name)
+        if isinstance(val, str):
+            simp = find_simplified_chars(val)
+            if simp:
+                report.error(f"frontmatter {field_name} 含非繁體字（{''.join(simp)}）")
 
     return data
 

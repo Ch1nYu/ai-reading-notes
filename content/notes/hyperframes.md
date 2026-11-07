@@ -16,7 +16,7 @@ abstract: HyperFrames 是一個開源框架，讓開發者使用 HTML、CSS、�
 HyperFrames 將影片定義為普通 HTML 檔案，使用 data-* 屬性標記時間、軌道與剪輯（clip）。透過插件化的運作時序適配器（GSAP、CSS、Lottie、Three.js、Anime.js、WAAPI 或自訂執行環境），在無頭 Chrome 中逐幀擷取畫面，最後由 FFmpeg 編碼為 MP4。因為整個流程只依賴輸入的 HTML 與資產，相同的輸入永遠產出相同的影片，適合做為 CI 回歸測試或自動化內容產生的基礎。
 
 ### 技能系統與工作流程
-專為 AI 編碼代理人設計的「skills」機制提供 20 個預設工作流（如 product‑launch‑video、faceless‑explainer、pr‑to‑video 等）以及更細部的 domain skill（核心合約、動畫、關鍵框架、創意、媒體使用、CLI、音訊等）。代理人透過 npx skills add heygen‑com/hyperframes 安裝技能組，之後僅需描述需求（例如「產出 10 秒產品介紹，含淡入標題、背景影片與輕柔背景音樂」），技能會引導代理人完成規劃、撰寫有效的正
+專為 AI 編碼代理人設計的「skills」機制提供 20 個預設工作流（如 product‑launch‑video、faceless‑explainer、pr‑to‑video 等）以及更細部的 domain skill（核心合約、動畫、關鍵框架、創意、媒體使用、CLI、音訊等）。代理人透過 npx skills add heygen‑com/hyperframes 安裝技能組，之後僅需描述需求（例如「產出 10 秒產品介紹，含淡入標題、背景影片與輕柔背景音樂」），技能會引導代理人完成規劃、撰寫有效的 HTML、串接可尋找的動畫、加入媒體資產、執行 lint 檢查、預覽到最終渲染的完整製作流程。
 
 ### 使用方式與生態系統
 開發者亦可直接使用 CLI：先執行 npx hyperframes init my-video 建立專案，進入目錄後使用 npx hyperframes preview 即時預覽（帶熱重載），最後以 npx hyperframes render 產出 MP4。框架附帶 Catalog（如 flash‑through‑white、instagram‑follow、data‑chart）可直接加入為區塊或元件，同時提供 Studio 瀏覽器編輯器、AWS Lambda 渲染以及 Playground 線上試玩。

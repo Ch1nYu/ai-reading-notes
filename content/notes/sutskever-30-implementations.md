@@ -13,16 +13,16 @@ abstract: 這是一個 GitHub 倉庫，包含 30 篇 Ilya Sutskever 推薦的深
 ## 完整摘要
 
 ### 專案背景與完成度
-此倉庫源自 Ilya Sutskever 告訴 John Carmack 的經典閱讀清單，作者 pageman（Paul 'The Pageman' Pajo）在 2025 年 12 月前完成全部 30 篇論文的實作（30/30，100%）。每個 Notebook 皆使用純 NumPy、內建合成資料、可直接在 Jupyter 執行，並附帶詳細視覺化與解釋。README 另列出三個延伸專案：Sutskever-Agent（給 Agent 使用）、sutskever-30-beyond-numpy（多語言/多後
+此倉庫源自 Ilya Sutskever 告訴 John Carmack 的經典閱讀清單，作者 pageman（Paul 'The Pageman' Pajo）在 2025 年 12 月前完成全部 30 篇論文的實作（30/30，100%）。每個 Notebook 皆使用純 NumPy、內建合成資料、可直接在 Jupyter 執行，並附帶詳細視覺化與解釋。README 另列出三個延伸專案：Sutskever-Agent（給 Agent 使用）、sutskever-30-beyond-numpy（多語言/多後端實作）與付費 Google Colab 完整程式碼包。
 
 ### 論文分類與重點實作
-30 篇論文依主題分為四大類：(1) 基礎概念（第 1-5 篇）：複雜度動力學、字元級 RNN、LSTM、RNN 正則化、神經網路剪枝與 MDL 原則。(2) 架構與機制（第 6-15 篇）：Pointer Networks、AlexNet、Seq2Seq for Sets、GPipe、ResNet、擴張卷積、圖神經網路、Transformer、Bahdanau Attention、Pre-activation ResNet。(3) 進階主題（第 16-22 篇）：關係推理、VAE、Relational R
+30 篇論文依主題分為四大類：(1) 基礎概念（第 1-5 篇）：複雜度動力學、字元級 RNN、LSTM、RNN 正則化、神經網路剪枝與 MDL 原則。(2) 架構與機制（第 6-15 篇）：Pointer Networks、AlexNet、Seq2Seq for Sets、GPipe、ResNet、擴張卷積、圖神經網路、Transformer、Bahdanau Attention、Pre-activation ResNet。(3) 進階主題（第 16-22 篇）：關係推理、VAE、Relational RNN（含約 1100 行手寫反向傳播）、Coffee Automaton（不可逆性）、Neural Turing Machine、Deep Speech 2（CTC 語音辨識）與擴展法則（Scaling Laws）。(4) 理論與元學習（第 23-30 篇）：MDL 原則、機器超級智慧（AIXI）、Kolmogorov 複雜度、CS231n 視覺管線、多 token 預測（Multi-token Prediction）、密集段落檢索（DPR）、RAG 與 Lost in the Middle。
 
 ### 學習路徑與實作哲學
-README 規劃四條學習軌：入門（字元 RNN→LSTM→AlexNet→ResNet→VAE）、進階（RNN 正則化→Bahdanau Attention→Pointer Networks→Seq2Seq for Sets→CS231n→GPipe→Transformer→擴張卷積→擴展法則）、高階（Pre-activation ResNet→GNN→關係網路→Neural Turing Machine→CTC→密集檢索→RAG→Lost in the Middle）、理論與基礎（MDL→Kolmog
+README 規劃四條學習軌：入門（字元 RNN→LSTM→AlexNet→ResNet→VAE）、進階（RNN 正則化→Bahdanau Attention→Pointer Networks→Seq2Seq for Sets→CS231n→GPipe→Transformer→擴張卷積→擴展法則）、高階（Pre-activation ResNet→GNN→關係網路→Neural Turing Machine→CTC→密集檢索→RAG→Lost in the Middle）、理論與基礎（MDL 原則→Kolmogorov 複雜度→複雜度動力學→Coffee Automaton）。
 
 ### 關鍵洞見與延伸方向
-作者總結四大架構演進脈絡：RNN→LSTM（閘機制解決梯度消失）、Plain Net→ResNet（跳躍連結實現深層）、RNN→Transformer（注意力實現並行化）、固定詞表→Pointer（輸出可參考輸入）。四大基本機制：注意力（可微分選擇）、殘差連結（梯度高速公路）、閘控（學習資訊流控制）、外部記憶體（儲存與計算分離）。訓練層面強調擴展法則可預測、正則化與最佳化技巧、Compute-Optimal 權衡。理論基石包含資訊論（壓縮、熵、MDL）、複雜度（Kolmogorov 複雜度、冪律）、生成模型
+作者總結四大架構演進脈絡：RNN→LSTM（閘機制解決梯度消失）、Plain Net→ResNet（跳躍連結實現深層）、RNN→Transformer（注意力實現並行化）、固定詞表→Pointer（輸出可參考輸入）。四大基本機制：注意力（可微分選擇）、殘差連結（梯度高速公路）、閘控（學習資訊流控制）、外部記憶體（儲存與計算分離）。訓練層面強調擴展法則可預測、正則化與最佳化技巧、Compute-Optimal 權衡。理論基石包含資訊論（壓縮、熵、MDL）、複雜度（Kolmogorov 複雜度、冪律）、生成模型（VAE、ELBO、潛在空間）與記憶體（可微分資料結構）。
 
 ## 重點知識與概念拆解
 

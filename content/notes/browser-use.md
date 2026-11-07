@@ -14,13 +14,13 @@ abstract: Browser Use 是一個讓 AI 代理能像人類般操作網頁瀏覽器
 ## 完整摘要
 
 ### 核心功能與使用範例
-Browser Use 讓 AI 代理模擬人類瀏覽器行為，能開啟頁面、點擊按鍵、輸入文字、填寫表單以及結構化資料擷取（例如追蹤追隨者並匯出 CSV）。它支援多種 LLM（OpenAI、Anthropic、Google 等）透過統一的 ChatBrowserUse 介面，且提供 CLI 与 Python library 兩種使用方式，可依任務頻率選擇。此外，內建的自訂工具機制允許開發者擴展代理能力，例如加入專屬動作來處理特定網站邏輯。
+Browser Use 讓 AI 代理模擬人類瀏覽器行為，能開啟頁面、點擊按鍵、輸入文字、填寫表單以及結構化資料擷取（例如追蹤追隨者並匯出 CSV）。它支援多種 LLM（OpenAI、Anthropic、Google 等）透過統一的 ChatBrowserUse 介面，且提供 CLI 與 Python library 兩種使用方式，可依任務頻率選擇。此外，內建的自訂工具機制允許開發者擴展代理能力，例如加入專屬動作來處理特定網站邏輯。
 
 ### 安裝與快速開始
-首先使用 uv（或 pip）安裝 browser-use（需 Python 3.11+）：`uv add browser-use` 或 `pip install browser-use`。接著在專案根目錄建立 `.env` 檔案，填入取得自 Browser Use Cloud 或自行提供的 LLM API 金鑰（如 BROWSER_USE_API_KEY=your-key）。安裝完成後，可參考範例程式碼建立 Agent 並執行任務，例如查詢 browser-use 儲存庫的星星數。若已有其他代理（Claud
+首先使用 uv（或 pip）安裝 browser-use（需 Python 3.11+）：`uv add browser-use` 或 `pip install browser-use`。接著在專案根目錄建立 `.env` 檔案，填入取得自 Browser Use Cloud 或自行提供的 LLM API 金鑰（如 BROWSER_USE_API_KEY=your-key）。安裝完成後，可參考範例程式碼建立 Agent 並執行任務，例如查詢 browser-use 儲存庫的星星數。若已有其他代理（Claude Code、Codex、Cursor、Hermes、OpenClaw 等），也可直接執行 `browser-use skill install` 註冊技能並連線瀏覽器。
 
 ### 開源版與雲端版比較
-開源版免費且提供完整程式碼，適合想要自訂模型與深度整合的開發者；雲端版則提供託管代理與瀏覽器、內建隱身功能、Proxy 輪換、驗證碼處理、持久化檔案系統以及可擴展的平行執行。根據 BU Bench V1 基準測試，不同模型的成功率分布顯示 Cloud v4 Opus 4.8 達 85.0%、Cloud v4 (default) 78.0%，而開源版的 claude opus-4-7 為 74.0%，隨後逐步下降。Browser Use 在 Odysseys 排行榜上以 87.4% 平均分領先來自 Open、
+開源版免費且提供完整程式碼，適合想要自訂模型與深度整合的開發者；雲端版則提供託管代理與瀏覽器、內建隱身功能、Proxy 輪換、驗證碼處理、持久化檔案系統以及可擴展的平行執行。根據 BU Bench V1 基準測試，不同模型的成功率分布顯示 Cloud v4 Opus 4.8 達 85.0%、Cloud v4 (default) 78.0%，而開源版的 claude opus-4-7 為 74.0%，隨後逐步下降。Browser Use 在 Odysseys 排行榜（200 項長時程網頁任務）上以 87.4% 平均分領先來自 OpenAI、Anthropic、Google 與 Microsoft 的電腦使用代理。
 
 ## 重點知識與概念拆解
 

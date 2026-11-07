@@ -120,30 +120,23 @@ abstract: 作者 Avid 完整拆解如何建立一個「模型無關」的 AI Age
 
 ## 重點知識與概念拆解
 
-| 概念名 | 一句白話解釋 |
-|--------|--------------|
-| **Agentic Harness** | 針對「你的工作流」量身裁剪的控制層，而非針對某個 AI 模型；模型像馬/電線/被測系統，Harness 是固定在你 repo、檢查、核准習慣上的韁繩/線束/測試床。 |
-| **Abundance (智力豐富)** | 推理成本以年降 10 倍的速度暴跌（三年千倍），頂尖開源模型（K3）已逼近閉源前沿，模型選擇變成排程決策而非架構決策。 |
-| **Unevenness (能力不均)** | 同一模型在不同基準極端分化：K3 寫代碼 Terminal-Bench 第一、數學 FrontierMath Tier 4 僅 39%，你不是在選可信智力，而是在選「你能接住的錯誤形狀」。 |
-| **The Seam (縫隙/接縫)** | Harness 與模型唯一的接觸面，必須極薄：兩手寫 adapter + 20 個 JSON manifest，方言全塞進資料，換模型成本 = 寫一個文字檔。 |
-| **Self-extension (自我擴展)** | 三層：Tier 1 數據（JSON manifest 熱載入）、Tier 2 提案（系統起草調參，人工升級）、Tier 3 證據（學習事實需證據鏈）。**核心：系統可增知識、提調參，不可自授新能力**。 |
-| **Capability Boundary (能力邊界)** | 允許清單 5 欄位、拒絕清單 15 子字串（sandbox、capab、external_write…），上限只降不升，雙清單並行、允許優先，防止系統自擴籠子。 |
-| **Slot (槽位)** | 命名的智力插槽，純資料宣告；代碼零廠商名，註冊表 2 名、磁碟 20 檔。 |
-| **Cell (胞/隔離空間)** | 可丟棄的受限工作區：獨立 worktree、fake HOME、生成 profile、顯式可寫根；啟動時以探針證明隔離，非假設。 |
-| **Run (執行單元)** | 帶身分與明確生命週期的單一目標；非法狀態轉換回傳錯誤值而非 panic。 |
-| **Thread (執行緒/會話鏈)** | 共享一 Cell、一 provider session 的 Run 父子鏈；所有會話累積鍵於 thread root，非 turn。 |
-| **Ledger (帳本/事件日誌)** | 僅追加、有序、全域序號 + per-run 序號；**先持久化再廣播**，重連與即時共用同一 code path。 |
-| **Gate (閘門)** | 執行因規則或人工停下的點，理由附隨；真正的 gate 坐在副作用發生處，UI gate 只是建議。 |
-| **Dial (可調鈕)** | 系統可提案、版本化、可升級的設定，旁邊放凍結清單；系統提案、人工升級、上限只降不升。 |
-| **Fail Closed (失效關閉)** | 沙箱探針任一失敗 → 拒絕啟動 run，無警告橫幅、無降級模式、結構化拒絕帶診斷資訊。 |
-| **Progress-Gated Detection (進展門控偵測)** | 迴圈/停滯/迷路觸發器**必須**門於「明確缺乏進展」；進展訊號可重置計數器，誤報測試佔測試檔 1/3。 |
-| **Pure Guards (純守衛)** | 核心 crate (state、router、compiler、detector、policy) 零 IO、無時鐘、無隨機、無副作用 → 可窮盡測試每一個拒絕。 |
+| 概念 | 白話解釋 | 來源證據 |
+|------|----------|----------|
+| **Agentic Harness** | 針對「你的工作流」量身裁剪的控制層，而非針對某個 AI 模型；模型像馬/電線/被測系統，Harness 是固定在你 repo、檢查、核准習慣上的韁繩/線束/測試床。 | 五大核心概念之首：「A harness here is fitted to the work, not to the worker」，20 個 CLI 通過參考實作而註冊表零廠商名。 |
+| **Abundance 與 Unevenness** | 推理成本三年降千倍（MMLU-42 從 $60/M 降至 $0.06/M），但同一模型在不同基準極端分化（K3 在 Terminal-Bench 88.3 第一、FrontierMath Tier 4 僅 39%），選模型是在選「你能接住的錯誤形狀」。 | 背景與五大核心概念段落引用 Kimi K3 與 Claude Fable 5 的基準數據及 AA-Omniscience 50%+ 幻覺率。 |
+| **The Seam 與 Slot（BUILD 00）** | Harness 與模型唯一的接觸面必須極薄：兩手寫 adapter + 20 個 JSON manifest，把 CLI 方言全放進資料，換模型成本等於寫一個文字檔。 | BUILD 00 The Manifest：`cargo run --bin list-engines` 印出 2，磁碟有 20 個 `manifests/*.json`。 |
+| **Boundary 與 Ledger（BUILD 01–02）** | 單一 daemon process 獨佔所有副作用（SQLite、git、child process、network），所有事件先寫入 append-only 帳本再廣播，重連與即時共用同一路徑。 | BUILD 01–02：`lsof` 驗證僅 daemon 持有 SQLite、Unix socket 權限 0600，並以 `request_id` 保證冪等不重複廣播。 |
+| **State Table、Worktree 與 Thread（BUILD 03–04）** | 8×8 狀態轉換表將非法轉換視為可記錄值而非 panic；每 run 獨立 worktree，follow-up 累積於 thread root，絕不碰使用者 checkout 的分支。 | BUILD 03–04：64 項狀態積斷言測試，且 `Blocked → AwaitingApproval` 恢復時必須重進隊列等待人工核准。 |
+| **Cage 與 Fail Closed（BUILD 05）** | 從零建立乾淨沙箱環境（fake HOME、無 SSH_AUTH_SOCK、顯式可寫根），啟動時以 canary 探針證明隔離；任一探針失敗即拒絕啟動 run，無降級模式。 | BUILD 05 The Cage：`expect_denied` 探針驗證越界存取失敗，至少 3 個 canary 通過才允許 `run.start`。 |
+| **Denier、Router 與 Compiler（BUILD 06–08）** | 外寫指令（`git push`、`npm publish`）在 spawn 前攔截；路由骨架由專案事實（字數、檔數、check 指令）決定；模型提案的計畫視為不受信輸入，純函數預設拒絕。 | BUILD 06–08：核心 crate 零 IO，惡意計畫（cycle、雙 editor 同 scope、無 verifier）在測試中被拒並點名違反規則。 |
+| **Progress-Gated Detector（BUILD 09）** | 迴圈/停滯/迷路三種信號必須門控於「明確缺乏進展」，進展訊號可重置計數器，搭配雙層指紋與四階恢復階梯避免誤報讓警報失效。 | BUILD 09 The Detector：15 個測試中有 5 個專門斷言「苦幹有進展時不觸發誤報」。 |
+| **Capability Boundary 與 Evolution Guard（BUILD 10）** | 自我擴展分三層（資料、提案、證據），Allow-list（5 欄位）與 Deny-list（15 子字串）並行、上限只降不升，系統只能提案，升級唯人工。 | BUILD 10 The Evolution Guard：候選政策試圖調升 `max_turns` 在單元測試中被攔截拒絕。 |
 
 
 ## 中英金句與解釋
 
-| 原文 | 中譯 | 脈絡/解釋 |
-|------|------|-----------|
+| 原文 | 中譯 | 脈絡／解釋 |
+|------|------|------------|
 | "The model is the commodity and the harness is the asset. Build the harness like you will replace the model twice this year. You will." | 「模型是商品，Harness 才是資產。像今年要換兩次模型一樣去建 Harness。你真的會換。」 | 前言核心主張：投資不會過時的控制層，而非綁定特定模型的整合代碼。 |
 | "Intelligence got cheap and plural. Your control layer did not." | 「智力變得廉價且多元。你的控制層沒有。」 | 情境段落：點出痛點根源——模型更迭快，自建工具鏈卻拖累遷移。 |
 | "When models converge on price and stay uneven on capability, the only place left to build is between them." | 「當模型在價格上收斂、在能力上保持不均，唯一還能建設的地方就在他們之間。」 | The Bet 核心推論：跨模型路由/控制層成唯一護城河。 |
@@ -168,28 +161,9 @@ abstract: 作者 Avid 完整拆解如何建立一個「模型無關」的 AI Age
 
 ## 可參考資料
 
-- **參考實作倉庫**：https://github.com/codejunkie99/autoharness（Rust、macOS-only、GPUI、參考實作）
-- **Kimi K3 模型資訊**：2.8T 參數、16/896 experts、1M context、$3 in / $15 out、AA Intelligence Index 57
-- **基準測試**：
-  - Terminal-Bench（K3 88.3 vs Fable 5 84.6）
-  - SWE Marathon（K3 42.0 vs Fable 5 35.0）
-  - Frontend Code Arena（K3 1,679 vs Fable 5 1,631 vs GPT-5.6 Sol 1,618）
-  - FrontierMath Tier 4（K3 ~39% vs 閉源 ~90%）
-  - AA-Omniscience 幻覺率（K3 51%、Claude Fable 5 54.9%）
-- **關鍵文件**（Repo 內）：
-  - `AGENTS.md` (36 KB)、`PLAN.md`、`HANDOFF.md`、`HANDOFF-FABLE.md`
-  - `docs/superpowers/plans/`、`docs/superpowers/specs/`
-  - `crates/daemon/src/handoff.rs`（handoff brief 組裝邏輯）
-  - `crates/engines/src/lib.rs`、`crates/pty/manifests/*.json`（Manifest）
-  - `crates/protocol/src/lib.rs`、`crates/daemon/src/lib.rs`、`crates/daemon/src/auth.rs`（Boundary）
-  - `crates/store/src/lib.rs`（Ledger）
-  - `crates/core/src/lib.rs`（State Table）
-  - `crates/daemon/src/worktree.rs`、`crates/engines/src/adapter.rs`（Worktree）
-  - `crates/daemon/src/sandbox/canaries.rs`（Cage 探針）
-  - `crates/daemon/src/sandbox/policy.rs`（Denier）
-  - `crates/core/src/router.rs`（Router）
-  - `crates/core/src/graph.rs`（Compiler）
-  - `crates/core/src/detector.rs`（Detector）
-  - `crates/core/src/policy.rs`（Evolution Guard）
-- **作者**：Avid (@Av1dlive) X 貼文：https://x.com/Av1dlive/status/2085405823782842835
-- **協作模型**：內容由作者筆記 + Kimi K3 Code 撰寫 + Opus 4.7 編輯潤飾
+- **autoharness 參考實作倉庫**：文中 11 大 BUILD 的 Rust + GPUI（macOS-only）參考實作原始碼。 — <https://github.com/codejunkie99/autoharness>
+- **Kimi K3 模型規格**：2.8T 總參數、16/896 experts、1M context、$3 in / $15 out、AA Intelligence Index 57。
+- **文中引用之五大基準測試**：Terminal-Bench（K3 88.3 vs Fable 5 84.6）、SWE Marathon（42.0 vs 35.0）、Frontend Code Arena（1,679 vs 1,631）、FrontierMath Tier 4（~39% vs 閉源 ~90%）、AA-Omniscience 幻覺率（51% vs 54.9%）。
+- **Repo 內交接與規格文件**：`AGENTS.md`（36 KB）、`PLAN.md`、`HANDOFF.md`、`HANDOFF-FABLE.md`、`docs/superpowers/plans/` 與 `crates/daemon/src/handoff.rs`。
+- **Repo 內 11 大 BUILD 核心模組**：涵蓋 `crates/pty/manifests/*.json`（00 Manifest）、`crates/daemon/src/auth.rs`（01 Boundary）、`crates/store/src/lib.rs`（02 Ledger）、`crates/core/src/{lib,router,graph,detector,policy}.rs`（03, 07–10 純守衛）與 `crates/daemon/src/sandbox/{canaries,policy}.rs`（05–06 沙箱與外寫攔截）。
+- **Avid (@Av1dlive)**：原文作者與 X 貼文出處（由作者筆記、Kimi K3 Code 撰寫與 Opus 4.7 編輯潤飾）。 — <https://x.com/Av1dlive/status/2085405823782842835>

@@ -19,7 +19,7 @@ pi-review 是 Earendil Works 組織開發的開源擴展，專為 Pi（一款 AI
 擴展提供 `/review` 與 `/end-review` 兩個主要指令，支援六種審查模式：未提交變更、指定基礎分支、特定提交、GitHub PR（透過 gh CLI 本地檢出）、資料夾/檔案快照（非差異比較）。審查結果包含優先級排序的發現項目、明確的裁決與可執行的後續步驟，並區分給 AI 代理的回饋與給人類的呼叫。還支援從 `REVIEW_GUIDELINES.md` 載入自訂共享指令。
 
 ### 使用流程與指令範例
-啟動審查後可透過 `/end-review` 結束，並選擇三種回傳模式：僅回傳、回傳並總結、回傳並佇列修復工作。指令範例包含：`/review`、`/review uncommitted`、`/review branch main`、`/review commit abc123`、`/review pr 123`、`/review pr https://github.com/owner/repo/pull/123`、`/review folder src docs`、`/review branch main
+啟動審查後可透過 `/end-review` 結束，並選擇三種回傳模式：僅回傳、回傳並總結、回傳並佇列修復工作。指令範例包含：`/review`、`/review uncommitted`、`/review branch main`、`/review commit abc123`、`/review pr 123`、`/review pr https://github.com/owner/repo/pull/123`、`/review folder src docs`、`/review branch main --extra "focus on performance and error handling"`。
 
 ### 技術實現與專案結構
 專案採用 TypeScript 100% 實現，核心檔案為 `review.ts`，配合 `package.json`、`tsconfig.json` 等標準 Node.js 專案結構。安裝方式為 `pi install git:github.com/earendil-works/pi-review`。近期更新包含修正已棄用的 Pi 匯入（2026 年 5 月）與新增 clean-code 審查指南（2026 年 7 月），顯示專案持續維護中。

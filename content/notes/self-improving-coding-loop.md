@@ -13,13 +13,13 @@ abstract: CyrilXBT 分享兩項 AI 開發實戰資源：一是利用 DeepSeek v4
 ## 完整摘要
 
 ### 自我改進編碼循環（Self-Improving Coder Loop）
-首則推文展示一個可在 2 分鐘內於 Codex 部署的自我改進循環：克隆 repo「codex-self-imrpoving-loop」，將「3 loop workflow」圖片交給代理即可運行。系統採用三模型協作——DEEPSEEK 執行任務、LUNA 評估並寫入 log.md、SOL 依評估重寫 prompt.md——並以 watcher.md 與 rewriter.md 兩份規則文件限制行數不超過 12 行、Prompt 增長不超過 20%。作者表示已將 Opus 5 換為 DeepSeek v4-f
+首則推文展示一個可在 2 分鐘內於 Codex 部署的自我改進循環：克隆 repo「codex-self-imrpoving-loop」，將「3 loop workflow」圖片交給代理即可運行。系統採用三模型協作——DEEPSEEK 執行任務、LUNA 評估並寫入 log.md、SOL 依評估重寫 prompt.md——並以 watcher.md 與 rewriter.md 兩份規則文件限制行數不超過 12 行、Prompt 增長不超過 20%。作者表示已將 Opus 5 換為 DeepSeek v4-flash，在不犧牲品質的前提下大幅降低自動迭代迴圈的執行成本。
 
 ### Graph Architect 10 週課程架構與核心技能
 課程分四階段：第 1-2 週建立「為何圖譜優於純檢索」的概念並完成手動實體關係繪製練習；第 3-4 週依 Anthropic 官方 Cookbook 實作四階段管線——抽取、解析、組裝、查詢——並強調實體解析的關鍵性；第 5-6 週轉向代理圖設計，採用不可變計畫、分離層級、嚴格升級三大承諾，將代理決策顯性化為狀態圖；第 7-10 週構建兼具知識圖譜與代理圖的作品集專案，要求誠實記錄失敗模式與修正過程。
 
 ### 學習資源、就業路徑與持續精進習慣
-作者列出三大公開資源：Anthropic Claude Cookbook（知識圖譜建構）、DeepLearning.AI Andreas Kollegger 課程（代理知識圖譜端到端）、2026 年 4 月 arXiv 論文（代理圖設計理論）。就業面強調「Graph Architect」尚非標準職稱，建議以 AI Engineer、Agent Systems Engineer 等職缺投遞並亮出作品集；自由案源較易切入。長期習慣方面，要求從第 1 週起建立錯誤日誌，記錄每次抽取、解析、查詢失敗的輸入、問題、修
+作者列出三大公開資源：Anthropic Claude Cookbook（知識圖譜建構）、DeepLearning.AI Andreas Kollegger 課程（代理知識圖譜端到端）、2026 年 4 月 arXiv 論文（代理圖設計理論）。就業面強調「Graph Architect」尚非標準職稱，建議以 AI Engineer、Agent Systems Engineer 等職缺投遞並亮出作品集；自由案源較易切入。長期習慣方面，要求從第 1 週起建立錯誤日誌，記錄每次抽取、解析、查詢失敗的輸入、問題、修正方式與驗證結果，並定期回顧整理為可複用原則，在啟動新任務前調取相關經驗形成複利。
 
 ## 重點知識與概念拆解
 

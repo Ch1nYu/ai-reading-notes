@@ -56,25 +56,21 @@ DeepSeek-V4 原生為純文字模型，多模態工作流對開發者工具與�
 
 ## 重點知識與概念拆解
 
-| 概念名 | 白話解釋與關鍵數據 |
-| :--- | :--- |
-| **oMLX** | Apple Silicon 專用的 MLX 推論引擎優化版本 (v0.5.4)，支援大模型高效載入與推論，本次測試核心軟體棧。 |
-| **oQ4e-mtp 量化** | 4-bit 量化方案 (oQ4e) 加上 MTP (Multi-Token Prediction) 權重。模型體積 ~154 GB (官方 FP16/BF16 ~167 GB)，**資訊密度近乎無損**，是本地部署達陣關鍵。 |
-| **Mac Studio M3 Ultra (256GB)** | 統一記憶體架構 (UMA) 讓 CPU/GPU 共享 256 GB RAM，單機即可載入 150GB+ 大模型無需分卡通訊，本地部署大模型的最佳消費級硬體。 |
-| **Prefill / Decode 階段** | **Prefill (Prompt Processing)**：處理輸入上下文，本測平均 **125 tok/s** (合成峰值 330 tok/s)；**Decode (Token Generation)**：逐 token 生成，本測 **45 tok/s** 極其穩定。 |
-| **Agentic Benchmarks (代理基準測試)** | 非單純問答，而是測試 **Tool Calling (工具呼叫)、Structured Output (結構化輸出)、Planning/Reasoning (規劃推理)、Memory Management (記憶管理)** 等複合能力的 8 大任務包。 |
-| **量化精度保真度** | oQ4e-mtp 在 **BugFind (100分)、DataExtract (93分)、StructOutput (94分)** 甚至超越雲端 FP16 基準，證明高精度量化不損核心推理能力。 |
-| **TTFT (Time-To-First-Token) 差距** | 雲端 API (官方 Flash/Pro) 在首 Token 回應速度上顯著優於本地 (單卡記憶體頻寬限制)，適合即時聊天；本地適合批次/後台/長流程自動化。 |
-| **零速率限制與資料主權** | 本地部署核心價值：無 API 請求上限 (Rate Limits)，敏感程式碼/文件不出機房，滿足企業合規與高頻代理調用需求。 |
-| **長尾延遲** | 本地模型在複雜指令遵循 (InstructFollow) 與數學推理 (ReasonMath) 部分案例耗時極長 (達 5 分鐘 Timeout)，顯示 Decode 階段在高邏輯複雜度下的序列依賴瓶頸。 |
-| **Jundot (Hugging Face Repo)** | 提供 `DeepSeek-V4-Flash-0731-oQ4e-mtp` 量化權重的社群貢獻者，模型 ID 為 `Jundot--DeepSeek-V4-Flash-0731-oQ4e-mtp`。 |
-| **評測維度 A-E** | 基準測試的細項評分維度 (具體定義未公開)，但可觀察：A 常關聯核心任務成功率，B/C 常為格式/邏輯正確性，D/E 可能為邊界情況/穩健度。本地版在 BugFind 全維度 100% 極為罕見。 |
-| **多模態擴展需求** | 純文字模型需外掛 Vision Encoder (如 LLaVA 架構) 才能處理圖像，作者預告將釋出低成本整合方案。 |
+| 概念 | 白話解釋 | 來源證據 |
+|------|----------|----------|
+| **oMLX** | Apple Silicon 專用的 MLX 推論引擎優化版本（v0.5.4），支援大模型高效載入與本地推論。 | Overview 段落標明測試軟體棧為 oMLX 0.5.4，並以 `omlx bench` 測得 16K context 下峰值 Prefill 330.0 tok/s。 |
+| **oQ4e-mtp 量化** | 4-bit 量化方案（oQ4e）加上 MTP（Multi-Token Prediction）權重，保留絕大多數資訊密度，達到近乎無損的本地執行精度。 | 模型下載後約 154 GB（接近官方 167 GB 權重），模型 ID 為 `Jundot--DeepSeek-V4-Flash-0731-oQ4e-mtp`。 |
+| **Mac Studio M3 Ultra (256GB)** | 統一記憶體架構（UMA）讓 CPU/GPU 共享 256 GB RAM（60-core GPU），單機即可載入 150GB+ 大模型無需跨卡通訊。 | 實測 RAM 配置約 164.1 GB（軟限制 197.2 GB、硬限制 208.1 GB），在單台消費級桌機完成全部基準測試。 |
+| **Prefill / Decode 階段效能** | Prefill（提示詞處理）負責建立上下文快取，Decode（Token 生成）負責逐字產出回應；動態上下文與工具歷史會降低有效 Prefill 吞吐。 | 合成基準峰值 Prefill 為 330.0 tok/s，真實 Agentic 工作負載下平均有效 Prefill 為 125.2 tok/s，Decode 穩定維持 45.4 tok/s。 |
+| **Agentic Benchmarks（八大任務包）** | 測試工具呼叫、結構化輸出、程式碼除錯、指令遵循、數學推理與記憶管理等複合代理能力的開源評測套件。 | 由 @stevibe 提供，涵蓋 BugFind、CLI、DataExtract、HermesAgent、InstructFollow、ReasonMath、StructOutput、ToolCall 八大任務包。 |
+| **量化精度保真度** | 高精度量化在程式碼除錯、資料萃取與結構化輸出上不損核心推理能力，甚至在確定性格式保留上優於雲端端點。 | 本地版在 BugFind 拿 100 分（雲端 Pro 93、Flash 85）、DataExtract 拿 93 分（雲端 88）、StructOutput 拿 94 分（全場最高）。 |
+| **TTFT 差距與零速率限制** | 雲端 API 在首 Token 延遲（TTFT）佔優，適合即時多輪聊天；本地執行則具備零速率限制與資料不出機房的隱私優勢，適合背景代理自動化。 | ToolCall-15（本地 93 分 vs 官方 Flash 100 分）與 Takeaway #3 對比雲端低延遲聊天與本地連續代理自動化的適用邊界。 |
+| **複雜推理的長尾延遲** | 本地模型在複雜格式約束與多步數學推理中，受限於單機解碼頻寬與長思考鏈，部分案例會出現較長耗時或觸及超時上限。 | InstructFollow-15 本地 83 分（IF-01 耗時 2m 25s、IF-10 觸及 5m 00s timeout）；ReasonMath-15 本地 74 分，複雜題耗時 21s–48s。 |
 
 
 ## 中英金句與解釋
 
-| 原文 | 中譯 | 脈絡/解釋 |
+| 原文 | 中譯 | 脈絡／解釋 |
 | :--- | :--- | :--- |
 | **"The oQ4e scheme retains the vast majority of the original model's information density, ensuring near-lossless precision in local execution."** | **「oQ4e 方案保留了原始模型絕大多數的資訊密度，確保了本地執行的近乎無損精度。」** | 核心技術斷言：4-bit 量化不再是精度妥協的代名詞，配合 MTP 權重可達生產級品質。 |
 | **"Cloud APIs retain an advantage in raw Time-To-First-Token (TTFT) for rapid multi-turn chat, but local quants excel in continuous, privacy-first agentic automation where zero rate-limits are paramount."** | **「雲端 API 在首 Token 延遲 (TTFT) 上保有優勢，適合快速多輪對話；但本地量化模型在連續、隱私優先的代理自動化中脫穎而出，因為零速率限制才是關鍵。」** | 精準定義雲端與本地的適用邊界：延遲敏感 vs. 吞吐/隱私/成本敏感。 |
@@ -86,10 +82,10 @@ DeepSeek-V4 原生為純文字模型，多模態工作流對開發者工具與�
 
 ## 可參考資料
 
-1.  **評測套件作者**：[@stevibe](https://x.com/stevibe) — 提供開源 Agentic 評測套件 (BenchLocal / Agent API 介面)。
-2.  **推論引擎**：**oMLX** (v0.5.4) — Apple Silicon 優化推論引擎，基於 MLX。
-3.  **模型權重來源**：**Hugging Face - Jundot** — `Jundot/DeepSeek-V4-Flash-0731-oQ4e-mtp` (約 154 GB)。
-4.  **官方模型權重**：**Hugging Face - DeepSeek** — `deepseek-ai/DeepSeek-V4-Flash-0731` (官方 167 GB 權重)。
-5.  **硬體平台**：**Mac Studio M3 Ultra** (256GB Unified Memory, 60-core GPU) — Apple 官網規格。
-6.  **官方雲端 API**：**DeepSeek Official API** (`deepseek-v4-flash`, `deepseek-v4-pro`) 及 **OpenCode** (`deepseek-v4-flash-free`) 作為基準比較對象。
-7.  **作者後續內容預告**：Jerry Xiong (@Jerry_Galaxy) 將發布 DeepSeek 多模態視覺整合成本效益分析。
+- **@stevibe（評測套件作者）**：提供涵蓋 8 大真實任務包的開源 Agentic 評測套件（BenchLocal / Agent API 介面）。 — <https://x.com/stevibe>
+- **oMLX (v0.5.4)**：基於 MLX 的 Apple Silicon 優化推論引擎，支援大模型高效本地部署。
+- **Hugging Face - Jundot**：提供 `Jundot/DeepSeek-V4-Flash-0731-oQ4e-mtp` 量化權重（約 154 GB）。
+- **Hugging Face - DeepSeek**：提供 `deepseek-ai/DeepSeek-V4-Flash-0731` 官方原始權重（約 167 GB）。
+- **Mac Studio M3 Ultra**：本次測試硬體平台（256GB 統一記憶體、60-core GPU）。
+- **DeepSeek Official API & OpenCode**：提供 `deepseek-v4-flash`、`deepseek-v4-pro` 與 `deepseek-v4-flash-free` 雲端基準對照。
+- **Jerry Xiong (@Jerry_Galaxy)**：本文作者，實測並發布 DeepSeek V4 Flash 本地推論基準與多模態整合預告。 — <https://x.com/Jerry_Galaxy/status/2084246725251019162>

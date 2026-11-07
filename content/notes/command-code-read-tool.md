@@ -59,26 +59,26 @@ abstract: Command Code 創辦人 Ahmad Awais 深度剖析其重寫 `read_file` �
 
 ## 重點知識與概念拆解
 
-| 概念名 | 一句白話解釋 |
-|--------|--------------|
-| **三重上限** | 針對「行數多」、「單行寬」、「單行極長」三種敵對檔案，分別設定 2000 行、128 KB、2000 字元/行三道防線，缺一不可。 |
-| **自我描述錯誤** | 工具不拋 `Error:`，改回傳人類可讀的狀態句（如 `"is empty"`, `"offset=1847"`），並預計算分頁 offset，讓模型零推理成本直接復原。 |
-| **關係式不變量** | 跨工具、跨狀態的不變量（如 read 記錄 partial → write 拒絕覆寫），單一欄位驗證抓不到，唯有觀察生產流量才能發現。 |
-| **自我失效快取** | 命中即銷毀記錄；寧可多花一輪重讀，也不可讓模型永遠追著已被 compaction 吃掉的 stub 跑。 |
-| **對抗性檔名** | 檔案系統層面的 Unicode 正規化、零寬空間、彎引號差異，模型肉眼看不出來，工具層必須自動重試 7 種變體再做模糊建議。 |
-| **Chunk 邊界延遲判斷** | 串流讀取時若限制剛好卡在 chunk 邊界，「後面還有沒有資料」當下不可知；寧可沉默等下一 chunk，也不猜測撒謊。 |
-| **JPEG 品質階梯** | 圖片不直接拒絕或硬塞，而是 95→80→60→40→20 逐級壓縮至符合預算，確保視覺模型總能拿到圖。 |
-| **縮放因子揭露** | 附掛縮圖時必須附帶座標乘數，否則模型根據縮圖推算的點擊座標會系統性偏移。 |
-| **Notebook 語意化渲染** | 將 `.ipynb` 的 JSON 湯轉為標籤化 cell、圖表即圖片、大輸出改 `jq` 指標，模型能推理資料卻不付 token 代價。 |
-| **輸入修復而非拋回** | 別名自動對齊、數字字串用 `Number()` 嚴格轉型、拒絕小數 offset；靜默錯誤的讀取窗口比明確報錯危險得多。 |
-| **裝置路徑封鎖** | `/dev/zero` 等特殊檔在任何 I/O 前以名稱攔截，防止 cwd=/ 時 workspace boundary 失效導致自製 DoS。 |
-| **編碼衛生殺開關** | BOM 剝離、CRLF 正規化、UTF-8 安全截斷、快取附環境變數殺開關，都是「被咬過才會加」的防禦性細節。 |
+| 概念 | 白話解釋 | 來源證據 |
+|------|----------|----------|
+| **三重上限** | 針對「行數多」、「單行寬」、「單行極長」三種敵對檔案，分別設定 2000 行、128 KB、2000 字元/行三道防線，缺一不可。 | 工程經驗 #1：行窗口 2000 行、位元組預算 128 KB、單行鉗制 2000 字元；10 種 harness 中 8/10 具備基本雙上限。 |
+| **自我描述錯誤** | 工具不拋 `Error:`，改回傳人類可讀的狀態句（如 `"is empty"`, `"offset=1847"`），並預計算分頁 offset，讓模型零推理成本直接復原。 | 工程經驗 #2：「沉默是最貴的失敗」，每個死胡同自帶恢復提示與預計算 resume offset；基準測試中僅 1/10 將 EOF 回傳為提示而非錯誤。 |
+| **關係式不變量** | 跨工具、跨狀態的不變量（如 read 記錄 partial → write 拒絕覆寫），單一欄位驗證抓不到，唯有觀察生產流量才能發現。 | 工程經驗 #3：`read_file` 記錄 partial flag 與 `write_file` 拒絕覆寫配合 per-line clamp 曾造成生產環境死循環。 |
+| **自我失效快取** | 命中即銷毀記錄；寧可多花一輪重讀，也不可讓模型永遠追著已被 compaction 吃掉的 stub 跑。 | 工程經驗 #4：「A cache whose stale hit is catastrophic should expire itself on use」，dedup hit 即消耗該記錄。 |
+| **對抗性檔名** | 檔案系統層面的 Unicode 正規化、零寬空間、彎引號差異，模型肉眼看不出來，工具層必須自動重試 7 種變體再做模糊建議。 | 工程經驗 #5：針對 macOS 截圖 NARROW NO-BREAK SPACE 與 NFD 分解，重試 7 種拼寫變體並提供 Levenshtein(2) 建議（基準測試 1/10 支援）。 |
+| **Chunk 邊界延遲判斷** | 串流讀取時若限制剛好卡在 chunk 邊界，「後面還有沒有資料」當下不可知；寧可沉默等下一 chunk，也不猜測撒謊。 | 工程經驗 #6：延遲到下一個 chunk 再決定是否截斷，且不用 `break` 跳出 `for-await` 以免銷毀串流（基準測試 1/10 支援）。 |
+| **JPEG 品質階梯** | 圖片不直接拒絕或硬塞，而是 95→80→60→40→20 逐級壓縮至符合預算，確保視覺模型總能拿到圖。 | 工程經驗 #7：以 magic bytes 偵測圖片格式，4K 截圖依品質階梯壓縮至首個符合大小的版本附掛。 |
+| **縮放因子揭露** | 附掛縮圖時必須附帶座標乘數，否則模型根據縮圖推算的點擊座標會系統性偏移。 | 工程經驗 #8：附掛圖片時附帶 `"multiply displayed coords by 2.77"`（基準測試 3/10 支援）。 |
+| **Notebook 語意化渲染** | 將 `.ipynb` 的 JSON 湯轉為標籤化 cell、圖表即圖片、大輸出改 `jq` 指標，模型能推理資料卻不付 token 代價。 | 工程經驗 #9：剝離 base64 blob 與逐字元 source array，超過 10K 字元輸出改為 `jq` 指標。 |
+| **輸入修復而非拋回** | 別名自動對齊、數字字串用 `Number()` 嚴格轉型、拒絕小數 offset；靜默錯誤的讀取窗口比明確報錯危險得多。 | 工程經驗 #12：支援 `filePath` 10 種別名自動修正，拒絕 `"2abc"` 與小數 offset。 |
+| **裝置路徑封鎖** | `/dev/zero` 等特殊檔在任何 I/O 前以名稱攔截，防止 cwd=/ 時 workspace boundary 失效導致自製 DoS。 | 工程經驗 #13：在 I/O 前封鎖 `/dev/zero`、`/dev/urandom`、`/dev/stdin`、`/proc/<pid>/fd/*`（基準測試 1/10 支援）。 |
+| **編碼衛生殺開關** | BOM 剝離、CRLF 正規化、UTF-8 安全截斷、快取附環境變數殺開關，都是「被咬過才會加」的防禦性細節。 | 工程經驗 #14：位元組截斷用二分搜尋 UTF-8 prefix 避免切斷碼點，dedup 附環境變數關閉開關。 |
 
 
 ## 中英金句與解釋
 
-| 原文 | 中譯 | 脈絡/解釋 |
-|------|------|-----------|
+| 原文 | 中譯 | 脈絡／解釋 |
+|------|------|------------|
 | "I think the `read_file` tool is like a compiler that turns your filesystem into the model's context. Every decision inside it is a token budget decision multiplied by fifty million times it's used every month." | 「我認為 `read_file` 工具就像一個編譯器，把你的檔案系統編譯進模型的上下文。裡面的每個決策都是 token 預算決策，乘以每月五千萬次使用量。」 | 核心隱喻：將讀檔工具定位為「檔案系統→上下文」的編譯器，強調微小決策經放大後的經濟影響。 |
 | "And that's why coding agents feel expensive: the bill is mostly reads building context." | 「這就是為什麼 coding agent 覺得貴：帳單大多數是為了建構上下文而讀檔。」 | 直指成本結構：不是模型推理貴，是工具層濫讀堆出的上下文貴。 |
 | "What 'saves billions of tokens' means here: cost per successful read. Claude Code's read tool succeeds by spending more: more tokens per call, more turns per miss, and a model smart enough to fish the signal out of the noise. Ours had to succeed by spending less, because our models can't peek over a sloppy read and our users care about the token bill." | 「這裡的『省下數十億 token』指的是：每次成功讀取的成本。Claude Code 的讀取工具靠花更多 token 成功：每次呼叫更多 token、每次失誤更多輪次、模型夠聰明能從雜訊撈訊號。我們必須靠花更少成功，因為我們的模型沒法從濫讀中撈訊號，用戶也在乎 token 帳單。」 | 對比兩種成功策略：富裕模型靠容錯率、窮模型靠工程精度。 |
@@ -92,13 +92,10 @@ abstract: Command Code 創辦人 Ahmad Awais 深度剖析其重寫 `read_file` �
 
 ## 可參考資料
 
-- **Command Code**（文中提及的編碼代理專案，即將開源）  
-- **Claude Code**（Anthropic 官方編碼代理，閉源，作為基準對比欄）  
-- **其他基準測試對象**：OpenCode、Cline、Kilo、Codex、Grok、Hermes、Pi、OpenClaw（多為開源）  
-- **`pdftotext`**（Poppler 工具，用於 PDF 文字擷取提示）  
-- **`jq`**（JSON 處理工具，用於 Notebook 大輸出指標）  
-- **Unicode 正規化形式**：NFC、NFD（檔名修復章節涉及）  
-- **Levenshtein 距離**（檔名模糊建議演算法，距離 ≤ 2）  
-- **Magic bytes / File signatures**（圖片格式偵測依據，非副檔名）  
-
-> 本內容未明確提及其他論文、書籍或外部連結資源。
+- **Command Code**：文中提及的開放模型編碼代理專案，v1 版本從零重寫 `read_file` 工具並計畫開源。 — <https://x.com/MrAhmadAwais/status/2086521445694517404>
+- **Claude Code**：Anthropic 官方編碼代理（閉源），文中以黑箱探針作為 10 種 harness 的基準對比對象。
+- **其他基準測試對象**：OpenCode、Cline、Kilo、Codex、Grok、Hermes、Pi、OpenClaw 等主流 coding agent harness。
+- **`pdftotext`（Poppler）**：用於處理 `.pdf` 檔案讀取時的文字擷取工具提示。
+- **`jq`**：JSON 處理工具，用於 `.ipynb` Notebook 超過 10K 字元大輸出時的指標查詢。
+- **Unicode 正規化（NFC / NFD）與 Levenshtein 距離**：用於修復 macOS 截圖對抗性檔名與提供距離 ≤ 2 的模糊檔名建議。
+- **Magic bytes（File signatures）**：用於圖片與二進位檔案的真實格式偵測，避免依賴副檔名。
