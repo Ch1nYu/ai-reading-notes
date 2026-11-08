@@ -235,11 +235,14 @@ button { font: inherit; color: inherit; }
   border-top: 1px solid var(--ink); border-left: 1px solid var(--rule);
 }
 .topic-grid li { border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
-.topic-grid a { display: grid; gap: 0.25rem; padding: 1.25rem 1.25rem 1.5rem; height: 100%; text-decoration: none; transition: background 0.2s var(--ease); }
+.topic-grid a { display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; padding: 1.4rem 1.35rem 1.25rem; height: 100%; text-decoration: none; transition: background 0.2s var(--ease); }
 .topic-grid a:hover { background: var(--paper-2); color: inherit; }
-.topic-grid__count { font: 500 0.8125rem var(--font-mono); color: var(--accent); }
-.topic-grid__label { font: 700 1.15rem/1.4 var(--font-serif); }
-.topic-grid__desc { font-size: 0.875rem; line-height: 1.6; color: var(--muted); }
+.topic-grid__body { display: flex; flex-direction: column; gap: 0.5rem; }
+.topic-grid__label { font: 700 1.2rem/1.35 var(--font-serif); }
+.topic-grid__desc { font-size: 0.875rem; line-height: 1.6; color: var(--muted); margin: 0; }
+.topic-grid__foot { display: flex; justify-content: flex-end; align-items: center; margin-top: auto; padding-top: 0.5rem; }
+.topic-grid__count { font: 500 0.8125rem var(--font-mono); color: var(--muted); }
+.topic-grid a:hover .topic-grid__count { color: var(--accent); }
 
 /* ==========================================================================
    Note page

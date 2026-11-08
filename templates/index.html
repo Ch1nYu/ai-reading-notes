@@ -75,9 +75,13 @@
     {% for t in topics %}
     <li>
       <a href="{{ root }}?topic={{ t.key }}#notes" data-topic-link="{{ t.key }}">
-        <span class="topic-grid__count">{{ '%02d'|format(t.count) }}</span>
-        <span class="topic-grid__label">{{ t.label }}</span>
-        <span class="topic-grid__desc">{{ t.description }}</span>
+        <div class="topic-grid__body">
+          <span class="topic-grid__label">{{ t.label }}</span>
+          <p class="topic-grid__desc">{{ t.description }}</p>
+        </div>
+        <div class="topic-grid__foot">
+          <span class="topic-grid__count">{{ t.count }} 篇</span>
+        </div>
       </a>
     </li>
     {% endfor %}
